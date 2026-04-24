@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f46f58466e202894eba54bd045b88345, type: 3}
   m_Name: PlayerSettings
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSettings
+  gamepadKullanilsinMi: 0
   yurumeHizi: 5
   kosmaHizi: 8
   ziplamaGucu: 1
@@ -20,6 +21,23 @@ MonoBehaviour:
   yerKatmani:
     serializedVersion: 2
     m_Bits: 64
-  fareHassasiyeti: 2
+  fareHassasiyetiX: 2
+  fareHassasiyetiY: 2
+  fareTersX: 0
+  fareTersY: 0
+  gamepadHassasiyetiX: 1
+  gamepadHassasiyetiY: 1
+  gamepadTersX: 0
+  gamepadTersY: 1
   yukariBakmaSiniri: -80
   asagiBakmaSiniri: 80
+  kazmaHizi: 0.7
+  ziplamaTusu: 32
+  kosmaTusu: 304
+  etkilesimTusu: 101
+  vurmaTusu: 323
+  ziplamaGamepad: 330
+  kosmaGamepad: 338
+  etkilesimGamepad: 332
+  vurmaGamepad: 335
+  kosmaBasCekMi: 0
