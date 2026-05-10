@@ -1,4 +1,4 @@
 public interface IInteractable
 {
-    void EtkilesimeGec();
+    void Interact();
 }

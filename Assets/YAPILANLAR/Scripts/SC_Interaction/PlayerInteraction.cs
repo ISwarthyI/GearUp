@@ -1,42 +1,40 @@
 using UnityEngine;
 
-[RequireComponent(typeof(IPlayerInput))] // Bu scriptin IPlayerInput olmadan çalışmasını engeller
+[RequireComponent(typeof(IPlayerInput))]
 public class PlayerInteraction : MonoBehaviour
 {
-    [Header("Etkileşim Ayarları")]
-    public float etkilesimMenzili = 3f;
-    public LayerMask etkilesimKatmani;
-    public Camera oyuncuKamerasi;
+    [Header("Interaction Settings")]
+    public float interactionRange = 3f;
+    public LayerMask interactionLayer;
+    public Camera playerCamera;
 
     private IPlayerInput input;
 
     private void Awake()
     {
-        // Girdi arayüzünü kendi üstündeki (veya Player'daki) bileşenden alıyoruz
         input = GetComponent<IPlayerInput>();
     }
 
     private void Update()
     {
-        // Artık Input.GetKeyDown(KeyCode.E) yerine arayüzü kullanıyoruz
-        if (input.EtkilesimeGirdiMi)
+        // Girdi arayüzündeki İngilizce isimlendirmeyi (Interacted) kullanıyoruz
+        if (input != null && input.Interacted)
         {
-            EtkilesimDene();
+            TryInteract();
         }
     }
 
-    private void EtkilesimDene()
+    private void TryInteract()
     {
-        Ray ray = new Ray(oyuncuKamerasi.transform.position, oyuncuKamerasi.transform.forward);
-        RaycastHit hit;
+        Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
 
-        if (Physics.Raycast(ray, out hit, etkilesimMenzili, etkilesimKatmani))
+        if (Physics.Raycast(ray, out RaycastHit hit, interactionRange, interactionLayer))
         {
-            IInteractable etkilesimliObje = hit.collider.GetComponent<IInteractable>();
+            IInteractable interactableObject = hit.collider.GetComponent<IInteractable>();
 
-            if (etkilesimliObje != null)
+            if (interactableObject != null)
             {
-                etkilesimliObje.EtkilesimeGec();
+                interactableObject.Interact();
             }
         }
     }

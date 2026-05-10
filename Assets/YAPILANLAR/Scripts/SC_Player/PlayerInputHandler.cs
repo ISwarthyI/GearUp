@@ -2,57 +2,55 @@ using UnityEngine;
 
 public class PlayerInputHandler : MonoBehaviour, IPlayerInput
 {
-    [SerializeField] private PlayerSettings ayarlar;
+    [SerializeField] private PlayerSettings settings;
 
-    private bool kosmaAcikMi = false;
+    private bool isSprintToggled = false;
 
-    // Aktif tuşları belirleyen yardımcı özellikler (Properties)
-    private KeyCode AktifZiplamaTusu => ayarlar.gamepadKullanilsinMi ? ayarlar.ziplamaGamepad : ayarlar.ziplamaTusu;
-    private KeyCode AktifKosmaTusu => ayarlar.gamepadKullanilsinMi ? ayarlar.kosmaGamepad : ayarlar.kosmaTusu;
-    private KeyCode AktifEtkilesimTusu => ayarlar.gamepadKullanilsinMi ? ayarlar.etkilesimGamepad : ayarlar.etkilesimTusu;
-    // PlayerInputHandler.cs içine diğer aktif tuşların yanına ekle:
-    private KeyCode AktifVurmaTusu => ayarlar.gamepadKullanilsinMi ? ayarlar.vurmaGamepad : ayarlar.vurmaTusu;
+    // Aktif tuşları belirleyen yardımcı özellikler (Keyboard vs Gamepad)
+    private KeyCode ActiveJumpKey => settings.useGamepad ? settings.jumpGamepad : settings.jumpKey;
+    private KeyCode ActiveSprintKey => settings.useGamepad ? settings.sprintGamepad : settings.sprintKey;
+    private KeyCode ActiveInteractKey => settings.useGamepad ? settings.interactGamepad : settings.interactKey;
+    private KeyCode ActiveAttackKey => settings.useGamepad ? settings.attackGamepad : settings.attackKey;
+    private KeyCode ActiveWeapon1Key => settings.useGamepad ? settings.weapon1Gamepad : settings.weapon1Key;
+    private KeyCode ActiveWeapon2Key => settings.useGamepad ? settings.weapon2Gamepad : settings.weapon2Key;
 
-    // Arayüzden gelen zorunlu özelliği tanımla:
-    public bool VurduMu => Input.GetKey(AktifVurmaTusu);
+    public Vector2 MovementInput => new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-    // Sol analog otomatik olarak bu eksenleri okur
-    public Vector2 HareketGirdisi => new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-
-    public Vector2 KameraGirdisi
+    public Vector2 CameraInput
     {
         get
         {
-            if (ayarlar.gamepadKullanilsinMi)
+            if (settings.useGamepad)
             {
-                // Sağ analog eksenleri (Unity ayarlarında oluşturacağız)
                 return new Vector2(Input.GetAxis("RightStickX"), Input.GetAxis("RightStickY"));
             }
             return new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
         }
     }
 
-    public bool ZipladiMi => Input.GetKey(AktifZiplamaTusu);
+    public bool Jumped => Input.GetKey(ActiveJumpKey);
+    public bool Interacted => Input.GetKeyDown(ActiveInteractKey);
+    public bool Attacked => Input.GetKey(ActiveAttackKey);
+    public bool SelectedWeapon1 => Input.GetKeyDown(ActiveWeapon1Key);
+    public bool SelectedWeapon2 => Input.GetKeyDown(ActiveWeapon2Key);
 
-    public bool EtkilesimeGirdiMi => Input.GetKeyDown(AktifEtkilesimTusu);
-
-    public bool KosuyorMu
+    public bool IsRunning
     {
         get
         {
-            if (ayarlar.kosmaBasCekMi)
+            if (settings.toggleSprint)
             {
-                if (Input.GetKeyDown(AktifKosmaTusu))
-                    kosmaAcikMi = !kosmaAcikMi;
+                if (Input.GetKeyDown(ActiveSprintKey))
+                    isSprintToggled = !isSprintToggled;
 
-                if (HareketGirdisi.magnitude == 0)
-                    kosmaAcikMi = false;
+                if (MovementInput.magnitude == 0)
+                    isSprintToggled = false;
 
-                return kosmaAcikMi;
+                return isSprintToggled;
             }
             else
             {
-                return Input.GetKey(AktifKosmaTusu);
+                return Input.GetKey(ActiveSprintKey);
             }
         }
     }

@@ -4,14 +4,14 @@
 [RequireComponent(typeof(IPlayerInput))]
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private PlayerSettings ayarlar;
-    [SerializeField] private Transform yerKontrolNoktasi; // Karakterin ayak ucu
+    [SerializeField] private PlayerSettings settings;
+    [SerializeField] private Transform groundCheck;
 
     private CharacterController controller;
     private IPlayerInput input;
-    private Vector3 hizVektoru;
-    private Vector3 hareketYonu;
-    private bool yerdeMi;
+    private Vector3 velocity;
+    private Vector3 moveDirection;
+    private bool isGrounded;
 
     private void Awake()
     {
@@ -21,48 +21,48 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        HareketiHesapla();
-        YercekimiVeZiplamaUygula();
+        CalculateMovement();
+        ApplyGravityAndJump();
     }
 
-    private void HareketiHesapla()
+    private void CalculateMovement()
     {
-        float aktifHiz = input.KosuyorMu ? ayarlar.kosmaHizi : ayarlar.yurumeHizi;
+        // DÜZELTİLEN KISIM: input.KosuyorMu -> input.IsRunning
+        float activeSpeed = input.IsRunning ? settings.runSpeed : settings.walkSpeed;
 
-        hareketYonu = transform.right * input.HareketGirdisi.x + transform.forward * input.HareketGirdisi.y;
+        // DÜZELTİLEN KISIM: input.HareketGirdisi -> input.MovementInput
+        moveDirection = transform.right * input.MovementInput.x + transform.forward * input.MovementInput.y;
 
-        if (hareketYonu.magnitude > 1f) hareketYonu.Normalize();
+        if (moveDirection.magnitude > 1f) moveDirection.Normalize();
 
-        controller.Move(hareketYonu * (aktifHiz * Time.deltaTime));
+        controller.Move(moveDirection * (activeSpeed * Time.deltaTime));
     }
 
-    private void YercekimiVeZiplamaUygula()
+    private void ApplyGravityAndJump()
     {
-        // Kendi Ground Check sistemimiz: Belirtilen noktada bir küre oluştur ve yer katmanıyla çarpışmasını kontrol et
-        yerdeMi = Physics.CheckSphere(yerKontrolNoktasi.position, ayarlar.yerKontrolYaricapi, ayarlar.yerKatmani);
+        isGrounded = Physics.CheckSphere(groundCheck.position, settings.groundCheckRadius, settings.groundLayer);
 
-        if (yerdeMi && hizVektoru.y < 0)
+        if (isGrounded && velocity.y < 0)
         {
-            hizVektoru.y = -2f; // Yere değdiğinde birikmiş yerçekimi hızını sıfırla/sabitle
+            velocity.y = -2f;
         }
 
-        // Zıplama koşuluna kendi yerdeMi değişkenimizi bağladık
-        if (input.ZipladiMi && yerdeMi)
+        // DÜZELTİLEN KISIM: input.ZipladiMi -> input.Jumped
+        if (input.Jumped && isGrounded)
         {
-            hizVektoru.y = Mathf.Sqrt(ayarlar.ziplamaGucu * -2f * ayarlar.yercekimi);
+            velocity.y = Mathf.Sqrt(settings.jumpPower * -2f * settings.gravity);
         }
 
-        hizVektoru.y += ayarlar.yercekimi * Time.deltaTime;
-        controller.Move(hizVektoru * Time.deltaTime);
+        velocity.y += settings.gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
     }
 
-    // Geliştirici kolaylığı: Seçili kürenin nerede ve ne kadar büyük olduğunu Editor'de kırmızı bir çizgiyle gösterir
     private void OnDrawGizmos()
     {
-        if (yerKontrolNoktasi != null && ayarlar != null)
+        if (groundCheck != null && settings != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(yerKontrolNoktasi.position, ayarlar.yerKontrolYaricapi);
+            Gizmos.DrawWireSphere(groundCheck.position, settings.groundCheckRadius);
         }
     }
 }
